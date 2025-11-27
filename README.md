@@ -1,12 +1,13 @@
 # Project: Grin Compression
 
-Authors: (_TODO: fill in names here!_)
+Authors: Suzune Yagi
 
 ## Resources
 
-*   (_TODO: fill in resources here!_)
-*   ...
-*   ...
+*   https://osera.cs.grinnell.edu/ttap/data-structures-labs/grin-compression.html
+*   https://docs.oracle.com/en/java/javase/11/docs/api/
+*   Visual Studio Code 
+*   Oracle, OpenJDK compiler
 
 ## Revision Log
 

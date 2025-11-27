@@ -1,7 +1,11 @@
 package edu.grinnell.csc207.compression;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
-
+import java.util.PriorityQueue;
+import java.util.Set;
 /**
  * A HuffmanTree derives a space-efficient coding of a collection of byte
  * values.
@@ -16,29 +20,125 @@ import java.util.Map;
  */
 public class HuffmanTree {
 
+    private Node huffmanTree;
+
+    // Two Node class constructor one for leaf, one for internal 
+    // isLeaf to know if it's a leaf
+
+    public static class Node implements Comparable<Node> {
+        public boolean isLeaf;
+        public Short character;
+        public int frequency;
+
+        public Node left;
+        public Node right;
+
+        //leaf
+        public Node (Short character, int frequency) {
+            this.isLeaf = true;
+            this.character = character;
+            this.frequency = frequency;
+        }
+
+        // internal node
+        public Node (Node left, Node right) {
+            this.isLeaf = false;
+            this.frequency = left.frequency + right.frequency;
+            this.left = left;
+            this.right = right;
+        }
+
+        @Override
+        public int compareTo(Node other) {
+            return Integer.compare(this.frequency, other.frequency);
+        }
+    }
+
+
     /**
      * Constructs a new HuffmanTree from a frequency map.
      * @param freqs a map from 9-bit values to frequencies.
      */
     public HuffmanTree (Map<Short, Integer> freqs) {
-        // TODO: fill me in!
+        // EOF
+        freqs.put((short)256, 1);
+
+        PriorityQueue<Node> queue = new PriorityQueue<>();
+
+        // Building a leaf node for each of the characters in character frequency map (freqs)
+        Set<Map.Entry<Short, Integer>> entrySet = freqs.entrySet();
+        for (Map.Entry<Short, Integer> entry : entrySet) {
+            Node leaf = new Node(entry.getKey(), entry.getValue());
+            queue.add(leaf);
+        }
+
+        // Create internal nodes
+        while (queue.size() > 1) {
+            Node first = queue.poll();
+            Node second = queue.poll();
+            Node internalNode = new Node(first, second);
+            queue.add(internalNode);
+        }
+
+        this.huffmanTree = queue.poll();
+        
     }
 
     /**
      * Constructs a new HuffmanTree from the given file.
-     * @param in the input file (as a BitInputStream)
+     * @param in the input file (as a BitInputStream) encoded in a serialized format
      */
-    public HuffmanTree (BitInputStream in) {
-        // TODO: fill me in!
+    public HuffmanTree (BitInputStream in) throws IOException {
+        // PriorityQueue<Node> queue = new PriorityQueue<>();
+
+        // int magic = in.readBits(32);
+       
+        Node node = HuffmanTreeHelper(in);
+        // queue.add(node);
+        this.huffmanTree = node;
     }
 
+    public static Node HuffmanTreeHelper (BitInputStream in) throws IOException {
+        int bit = in.readBit();
+        if (bit == -1) {
+            throw new IOException();
+        } if (bit == 0) {
+            int value = in.readBits(9);
+            if (value != -1) {
+                Node leaf = new Node((short)value, 0);
+                return leaf;
+            } else {
+                throw new IOException();
+            }
+        } else {
+            Node left = HuffmanTreeHelper(in);
+            Node right = HuffmanTreeHelper(in);
+            Node internalNode = new Node(left, right);
+            return internalNode;
+        }
+    }
+ 
     /**
      * Writes this HuffmanTree to the given file as a stream of bits in a
      * serialized format.
      * @param out the output file as a BitOutputStream
      */
     public void serialize (BitOutputStream out) {
-        // TODO: fill me in!
+        serializeHelper(this.huffmanTree, out);
+    }
+
+    public void serializeHelper(Node huffmanTree, BitOutputStream out) {
+        if (huffmanTree.isLeaf) {
+            // if Node is leaf
+            out.writeBit(0);
+            out.writeBits(huffmanTree.character, 9);
+
+        } else {
+            // if Node is internalNode
+            out.writeBit(1);
+            serializeHelper(huffmanTree.left, out);
+            serializeHelper(huffmanTree.right, out);
+        }
     }
    
     /**
@@ -49,7 +149,41 @@ public class HuffmanTree {
      * @param out the file to write the compressed output to.
      */
     public void encode (BitInputStream in, BitOutputStream out) {
-        // TODO: fill me in!
+
+        // Payload
+        // Make a code map
+        Map<Short, String> encodeMap = makeEncodeMap(); // A map containing <huffmanTree.character, corresponding bits> such as <97('a'), "101">
+
+        int ch;
+        while ((ch = in.readBits(8)) != -1) {
+            String bits = encodeMap.get((short) ch);
+
+            for (int l = 0; l < bits.length(); l++) {
+                int bit = bits.charAt(l) - '0';
+                out.writeBit(bit);
+            }
+        }
+
+        // EOF
+        String eofBits = encodeMap.get((short)256);
+        for (int i = 0; i < eofBits.length(); i++) {
+            out.writeBit(eofBits.charAt(i) - '0');
+        }
+    }
+
+    public Map<Short, String> makeEncodeMap() {
+        Map<Short, String> encodeMap = new HashMap<>();
+        makeEncodeMapHelper(encodeMap, this.huffmanTree, "");
+        return encodeMap;
+    }
+
+    public void makeEncodeMapHelper(Map<Short, String> encodeMap, Node huffmanTree, String bits) {
+        if(huffmanTree.isLeaf) {
+            encodeMap.put(huffmanTree.character, bits);
+        } else {
+            makeEncodeMapHelper(encodeMap, huffmanTree.left, bits + "0");
+            makeEncodeMapHelper(encodeMap, huffmanTree.right, bits + "1");
+        }
     }
 
     /**
@@ -60,7 +194,27 @@ public class HuffmanTree {
      * @param in the file to decompress.
      * @param out the file to write the decompressed output to.
      */
-    public void decode (BitInputStream in, BitOutputStream out) {
-        // TODO: fill me in!
+    public void decode(BitInputStream in, BitOutputStream out) throws IOException {
+        Node tree = huffmanTree;
+
+        while (true) {
+            int bit = in.readBit();
+            if (bit == -1) {
+                break;
+            } else if (bit == 0) {
+                tree = tree.left;
+            } else if (bit == 1) {
+                tree = tree.right;
+            }
+
+            if (tree.isLeaf) {
+                if (tree.character == 256) {
+                    break;
+                } else {
+                    out.writeBits(8, tree.character);
+                    tree = huffmanTree;
+                }
+            }
+        }
     }
 }
