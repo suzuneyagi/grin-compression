@@ -219,4 +219,3 @@ Theory
 Entropy Kolmogorov complexity Lossy Quantization Rate–distortion Redundancy Timeline of information theory
 Template Compression formats Template Compression software (codecs)
 Categories: 1952 in computer scienceLossless compression algorithmsBinary trees
-

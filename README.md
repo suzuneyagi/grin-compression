@@ -8,6 +8,7 @@ Authors: Suzune Yagi
 *   https://docs.oracle.com/en/java/javase/11/docs/api/
 *   Visual Studio Code 
 *   Oracle, OpenJDK compiler
+*   David Rhoades (Course mentor)
 
 ## Revision Log
 

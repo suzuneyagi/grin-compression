@@ -89,12 +89,7 @@ public class HuffmanTree {
      * @param in the input file (as a BitInputStream) encoded in a serialized format
      */
     public HuffmanTree (BitInputStream in) throws IOException {
-        // PriorityQueue<Node> queue = new PriorityQueue<>();
-
-        // int magic = in.readBits(32);
-       
         Node node = HuffmanTreeHelper(in);
-        // queue.add(node);
         this.huffmanTree = node;
     }
 
@@ -180,6 +175,7 @@ public class HuffmanTree {
     public void makeEncodeMapHelper(Map<Short, String> encodeMap, Node huffmanTree, String bits) {
         if(huffmanTree.isLeaf) {
             encodeMap.put(huffmanTree.character, bits);
+            // System.out.println(huffmanTree.character + " " + bits);
         } else {
             makeEncodeMapHelper(encodeMap, huffmanTree.left, bits + "0");
             makeEncodeMapHelper(encodeMap, huffmanTree.right, bits + "1");
@@ -211,7 +207,7 @@ public class HuffmanTree {
                 if (tree.character == 256) {
                     break;
                 } else {
-                    out.writeBits(8, tree.character);
+                    out.writeBits(tree.character, 8);
                     tree = huffmanTree;
                 }
             }
