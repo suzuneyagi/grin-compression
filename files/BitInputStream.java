@@ -21,7 +21,7 @@ public class BitInputStream {
 
     /** @return true iff the stream has bits left to produce */
     public boolean hasBits() {
-        return digits != -1; 
+        return digits != -1;
     }
 
     /**
@@ -31,12 +31,12 @@ public class BitInputStream {
      **/
     public int readBit() {
         if (digits == -1) {
-            return -1; 
+            return -1;
         }
         int result = (digits & (1 << cursor)) >> cursor;
         cursor--;
         if (cursor < 0) {
-            nextByte(); 
+            nextByte();
         }
         return result;
     }
@@ -52,7 +52,7 @@ public class BitInputStream {
         for (int i = n - 1; i >= 0; i--) {
             int bit = readBit();
             if (bit == -1) {
-                return -1; 
+                return -1;
             }
             ret = ret | (bit << i);
         }
