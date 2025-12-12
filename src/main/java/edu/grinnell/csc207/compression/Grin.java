@@ -1,11 +1,8 @@
 package edu.grinnell.csc207.compression;
 
-import java.io.IOError;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
  * The driver for the Grin compression program.
@@ -17,7 +14,7 @@ public class Grin {
      * @param infile the file to decode
      * @param outfile the file to ouptut to
      */
-    public static void decode (String infile, String outfile) throws IOException {
+    public static void decode(String infile, String outfile) throws IOException {
         BitInputStream in = new BitInputStream(infile);
         BitOutputStream out = new BitOutputStream(outfile);
  
@@ -38,7 +35,7 @@ public class Grin {
      * @param file the file to read
      * @return a freqency map for the given file
      */
-    public static Map<Short, Integer> createFrequencyMap (String file) throws IOException {
+    public static Map<Short, Integer> createFrequencyMap(String file) throws IOException {
         BitInputStream in = new BitInputStream(file);
         // Make frequency map
         Map<Short, Integer> freqs = new HashMap<>();

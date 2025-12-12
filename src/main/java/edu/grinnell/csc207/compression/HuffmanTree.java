@@ -1,7 +1,6 @@
 package edu.grinnell.csc207.compression;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -34,14 +33,14 @@ public class HuffmanTree {
         public Node right;
 
         //leaf
-        public Node (Short character, int frequency) {
+        public Node(Short character, int frequency) {
             this.isLeaf = true;
             this.character = character;
             this.frequency = frequency;
         }
 
         // internal node
-        public Node (Node left, Node right) {
+        public Node(Node left, Node right) {
             this.isLeaf = false;
             this.frequency = left.frequency + right.frequency;
             this.left = left;
@@ -59,9 +58,9 @@ public class HuffmanTree {
      * Constructs a new HuffmanTree from a frequency map.
      * @param freqs a map from 9-bit values to frequencies.
      */
-    public HuffmanTree (Map<Short, Integer> freqs) {
+    public HuffmanTree(Map<Short, Integer> freqs) {
         // EOF
-        freqs.put((short)256, 1);
+        freqs.put((short) 256, 1);
 
         PriorityQueue<Node> queue = new PriorityQueue<>();
 
@@ -88,19 +87,19 @@ public class HuffmanTree {
      * Constructs a new HuffmanTree from the given file.
      * @param in the input file (as a BitInputStream) encoded in a serialized format
      */
-    public HuffmanTree (BitInputStream in) throws IOException {
+    public HuffmanTree(BitInputStream in) throws IOException {
         Node node = HuffmanTreeHelper(in);
         this.huffmanTree = node;
     }
 
-    public static Node HuffmanTreeHelper (BitInputStream in) throws IOException {
+    public static Node HuffmanTreeHelper(BitInputStream in) throws IOException {
         int bit = in.readBit();
         if (bit == -1) {
             throw new IOException();
         } if (bit == 0) {
             int value = in.readBits(9);
             if (value != -1) {
-                Node leaf = new Node((short)value, 0);
+                Node leaf = new Node((short) value, 0);
                 return leaf;
             } else {
                 throw new IOException();
@@ -118,10 +117,15 @@ public class HuffmanTree {
      * serialized format.
      * @param out the output file as a BitOutputStream
      */
-    public void serialize (BitOutputStream out) {
+    public void serialize(BitOutputStream out) {
         serializeHelper(this.huffmanTree, out);
     }
 
+    /**
+     * Recursively execute serialization
+     * @param huffmanTree node that is serialized
+     * @param out the output file as a BitOutputStream
+     */
     public void serializeHelper(Node huffmanTree, BitOutputStream out) {
         if (huffmanTree.isLeaf) {
             // if Node is leaf
@@ -143,11 +147,11 @@ public class HuffmanTree {
      * @param in the file to compress.
      * @param out the file to write the compressed output to.
      */
-    public void encode (BitInputStream in, BitOutputStream out) {
+    public void encode(BitInputStream in, BitOutputStream out) {
 
         // Payload
         // Make a code map
-        Map<Short, String> encodeMap = makeEncodeMap(); // A map containing <huffmanTree.character, corresponding bits> such as <97('a'), "101">
+        Map<Short, String> encodeMap = makeEncodeMap(); 
 
         int ch;
         while ((ch = in.readBits(8)) != -1) {
@@ -160,22 +164,31 @@ public class HuffmanTree {
         }
 
         // EOF
-        String eofBits = encodeMap.get((short)256);
+        String eofBits = encodeMap.get((short) 256);
         for (int i = 0; i < eofBits.length(); i++) {
             out.writeBit(eofBits.charAt(i) - '0');
         }
     }
 
+    /**
+     * Make encode map from the huffmantree
+     * @return a map that shows the hashcode and the original string
+     */
     public Map<Short, String> makeEncodeMap() {
         Map<Short, String> encodeMap = new HashMap<>();
         makeEncodeMapHelper(encodeMap, this.huffmanTree, "");
         return encodeMap;
     }
 
+   /**
+    * Encode a map containing <huffmanTree.character, corresponding bits> 
+    * @param encodeMap the map of short and string
+    * @param huffmanTree huffman tree that is used to make the enocde map
+    * @param bits bits of characters
+    */
     public void makeEncodeMapHelper(Map<Short, String> encodeMap, Node huffmanTree, String bits) {
-        if(huffmanTree.isLeaf) {
+        if (huffmanTree.isLeaf) {
             encodeMap.put(huffmanTree.character, bits);
-            // System.out.println(huffmanTree.character + " " + bits);
         } else {
             makeEncodeMapHelper(encodeMap, huffmanTree.left, bits + "0");
             makeEncodeMapHelper(encodeMap, huffmanTree.right, bits + "1");
