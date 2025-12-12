@@ -199,7 +199,7 @@ public class HuffmanTree {
     }
 
    /**
-    * Encode a map containing <huffmanTree.character, corresponding bits> 
+    * Encode a map containing character and the corresponding bits
     * @param encodeMap the map of short and string
     * @param huffmanTree huffman tree that is used to make the enocde map
     * @param bits bits of characters

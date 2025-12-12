@@ -30,7 +30,6 @@ public class BitInputStream {
      *         of data
      **/
     public int readBit() {
-        // if at eof, return -1
         if (digits == -1) {
             return -1; 
         }
