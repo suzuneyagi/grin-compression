@@ -94,9 +94,9 @@ public class Grin {
     public static void main(String[] args) throws IOException {
         if (args.length != 3) {
             System.out.println("Usage: java Grin <encode|decode> <infile> <outfile>");
-        } else if (args[0].equals ("encode")) {
+        } else if (args[0].equals("encode")) {
             encode(args[1], args[2]);
-        } else if (args[0].equals ("decode")) {
+        } else if (args[0].equals("decode")) {
             decode(args[1], args[2]);
         } else {
             System.out.println("Usage: java Grin <encode|decode> <infile> <outfile>");

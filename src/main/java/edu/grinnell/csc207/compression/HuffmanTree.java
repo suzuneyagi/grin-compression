@@ -24,6 +24,9 @@ public class HuffmanTree {
     // Two Node class constructor one for leaf, one for internal 
     // isLeaf to know if it's a leaf
 
+    /**
+     * Node classto store the character, frequency and if the node is a leaf
+     */
     public static class Node implements Comparable<Node> {
         public boolean isLeaf;
         public Short character;
@@ -32,14 +35,22 @@ public class HuffmanTree {
         public Node left;
         public Node right;
 
-        //leaf
+        /**
+         * Leaf constructor
+         * @param character character that is put in the leaf
+         * @param frequency the frequency that the character appears in the text
+         */
         public Node(Short character, int frequency) {
             this.isLeaf = true;
             this.character = character;
             this.frequency = frequency;
         }
 
-        // internal node
+        /**
+         * Internal node constructor
+         * @param left left node of the leaf
+         * @param right right node of the leaf
+         */
         public Node(Node left, Node right) {
             this.isLeaf = false;
             this.frequency = left.frequency + right.frequency;
@@ -88,15 +99,22 @@ public class HuffmanTree {
      * @param in the input file (as a BitInputStream) encoded in a serialized format
      */
     public HuffmanTree(BitInputStream in) throws IOException {
-        Node node = HuffmanTreeHelper(in);
+        Node node = huffmanTreeHelper(in);
         this.huffmanTree = node;
     }
 
-    public static Node HuffmanTreeHelper(BitInputStream in) throws IOException {
+    /**
+     * Helper to construct a new Huffman Tree from the given file
+     * @param in the input file (as a BitInputStream) encoded in a serialized format
+     * @return a node organized to the huffman tree structure
+     * @throws IOException if the file cannot be read
+     */
+    public static Node huffmanTreeHelper(BitInputStream in) throws IOException {
         int bit = in.readBit();
         if (bit == -1) {
             throw new IOException();
-        } if (bit == 0) {
+        } 
+        if (bit == 0) {
             int value = in.readBits(9);
             if (value != -1) {
                 Node leaf = new Node((short) value, 0);
@@ -105,8 +123,8 @@ public class HuffmanTree {
                 throw new IOException();
             }
         } else {
-            Node left = HuffmanTreeHelper(in);
-            Node right = HuffmanTreeHelper(in);
+            Node left = huffmanTreeHelper(in);
+            Node right = huffmanTreeHelper(in);
             Node internalNode = new Node(left, right);
             return internalNode;
         }
